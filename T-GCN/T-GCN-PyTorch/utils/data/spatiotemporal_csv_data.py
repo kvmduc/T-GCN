@@ -12,9 +12,10 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         adj_path: str,
         batch_size: int = 64,
         seq_len: int = 12,
-        pre_len: int = 3,
+        pre_len: int = 12,
         split_ratio: float = 0.8,
         normalize: bool = True,
+        year: int = 2011,
         **kwargs
     ):
         super(SpatioTemporalCSVDataModule, self).__init__()
@@ -25,9 +26,10 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         self.pre_len = pre_len
         self.split_ratio = split_ratio
         self.normalize = normalize
-        self._feat = utils.data.functions.load_features(self._feat_path)
-        self._feat_max_val = np.max(self._feat)
-        self._adj = utils.data.functions.load_adjacency_matrix(self._adj_path)
+        self._feat = self._feat_path
+        self._adj = utils.data.functions.load_adjacency_matrix(self._adj_path, year)
+        self._feat_max_val = 0
+        self.year = year
 
     @staticmethod
     def add_data_specific_arguments(parent_parser):
@@ -39,17 +41,20 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         parser.add_argument("--normalize", type=bool, default=True)
         return parser
 
+    # def setup(self, stage: str = None):
+    #     (
+    #         self.train_dataset,
+    #         self.val_dataset,
+    #     ) = utils.data.functions.generate_torch_datasets(
+    #         self._feat,
+    #         self.seq_len,
+    #         self.pre_len,
+    #         split_ratio=self.split_ratio,
+    #         normalize=self.normalize,
+    #     )
+
     def setup(self, stage: str = None):
-        (
-            self.train_dataset,
-            self.val_dataset,
-        ) = utils.data.functions.generate_torch_datasets(
-            self._feat,
-            self.seq_len,
-            self.pre_len,
-            split_ratio=self.split_ratio,
-            normalize=self.normalize,
-        )
+        self.train_dataset, self.val_dataset = utils.data.functions.generate_torch_datasets(self._feat, self.year)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size)

@@ -13,6 +13,7 @@ import utils.logging
 DATA_PATHS = {
     "shenzhen": {"feat": "data/sz_speed.csv", "adj": "data/sz_adj.csv"},
     "losloop": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
+    "PEMS03_stream": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
 }
 
 
@@ -98,16 +99,11 @@ if __name__ == "__main__":
     if args.log_path is not None:
         utils.logging.output_logger_to_file(pl._logger, args.log_path)
 
-    try:
-        results = main(args)
-    except:  # noqa: E722
-        traceback.print_exc()
-        if args.send_email:
-            tb = traceback.format_exc()
-            subject = "[Email Bot][❌] " + "-".join([args.settings, args.model_name, args.data])
-            utils.email.send_email(tb, subject)
-        exit(-1)
 
-    if args.send_email:
-        subject = "[Email Bot][✅] " + "-".join([args.settings, args.model_name, args.data])
-        utils.email.send_experiment_results_email(args, results, subject=subject)
+    vars(args)['begin_year'] = 2011
+    vars(args)['end_year'] = 2017
+    vars(args)['pre_len'] = 12
+
+    for year in range(args.begin_year, args.end_year + 1):
+        vars(args)['year'] = year
+        results = main(args)

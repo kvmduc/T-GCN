@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import torch
+import os
+import os.path as osp
+
 
 
 def load_features(feat_path, dtype=np.float32):
@@ -9,9 +12,13 @@ def load_features(feat_path, dtype=np.float32):
     return feat
 
 
-def load_adjacency_matrix(adj_path, dtype=np.float32):
-    adj_df = pd.read_csv(adj_path, header=None)
-    adj = np.array(adj_df, dtype=dtype)
+# def load_adjacency_matrix(adj_path, dtype=np.float32):
+#     adj_df = pd.read_csv(adj_path, header=None)
+#     adj = np.array(adj_df, dtype=dtype)
+#     return adj
+
+def load_adjacency_matrix(adj_path, year, dtype=np.float32):
+    adj = np.load(osp.join(adj_path, str(year)+"_adj.npz"))["x"]
     return adj
 
 
@@ -45,21 +52,55 @@ def generate_dataset(
     return np.array(train_X), np.array(train_Y), np.array(test_X), np.array(test_Y)
 
 
-def generate_torch_datasets(
-    data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True
-):
-    train_X, train_Y, test_X, test_Y = generate_dataset(
-        data,
-        seq_len,
-        pre_len,
-        time_len=time_len,
-        split_ratio=split_ratio,
-        normalize=normalize,
-    )
+# def generate_torch_datasets(
+#     data, seq_len, pre_len, time_len=None, split_ratio=0.8, normalize=True
+# ):
+#     train_X, train_Y, test_X, test_Y = generate_dataset(
+#         data,
+#         seq_len,
+#         pre_len,
+#         time_len=time_len,
+#         split_ratio=split_ratio,
+#         normalize=normalize,
+#     )
+
+#     #print(train_X.shape)         #(num_data, seq_len, N)
+#     #print(train_Y.shape)         #(num_data, pre_len, N)
+#     train_dataset = torch.utils.data.TensorDataset(
+#         torch.FloatTensor(train_X), torch.FloatTensor(train_Y)
+#     )
+#     test_dataset = torch.utils.data.TensorDataset(
+#         torch.FloatTensor(test_X), torch.FloatTensor(test_Y)
+#     )
+#     return train_dataset, test_dataset
+
+
+def generate_torch_datasets(data_path, year):
+
+    dirpath = os.path.dirname(data_path)
+
+    filename = os.path.join(dirpath, str(year)+"_30day.npz")
+
+    print('load file:', filename)
+
+    file_data = np.load(filename, allow_pickle=True)
+    
+
+    train_x = file_data['train_x']                              # (num_data, seq_len, num_node)
+    train_y = file_data['train_y']                              # (num_data, seq_len, num_node)
+
+    # val_x = file_data['val_x']                                  # (num_data, seq_len, num_node)
+    # val_target = file_data['val_y']                             # (num_data, seq_len, num_node)
+
+    test_x = file_data['test_x']                                # (num_data, seq_len, num_node)
+    test_y = file_data['test_y']                                # (num_data, seq_len, num_node)
+
+    #print(train_X.shape)         #(num_data, seq_len, N)
+    #print(train_Y.shape)         #(num_data, pre_len, N)
     train_dataset = torch.utils.data.TensorDataset(
-        torch.FloatTensor(train_X), torch.FloatTensor(train_Y)
+        torch.FloatTensor(train_x), torch.FloatTensor(train_y)
     )
     test_dataset = torch.utils.data.TensorDataset(
-        torch.FloatTensor(test_X), torch.FloatTensor(test_Y)
+        torch.FloatTensor(test_x), torch.FloatTensor(test_y)
     )
     return train_dataset, test_dataset
