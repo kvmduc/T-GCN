@@ -77,6 +77,7 @@ def generate_dataset(
 
 def generate_torch_datasets(data_path, year):
 
+    _feat_max_val = 0
     dirpath = os.path.dirname(data_path)
 
     filename = os.path.join(dirpath, str(year)+"_30day.npz")
@@ -87,13 +88,18 @@ def generate_torch_datasets(data_path, year):
     
 
     train_x = file_data['train_x']                              # (num_data, seq_len, num_node)
+    max_train_x = np.max(train_x)
     train_y = file_data['train_y']                              # (num_data, seq_len, num_node)
+    max_train_y = np.max(train_y)
+
 
     # val_x = file_data['val_x']                                  # (num_data, seq_len, num_node)
     # val_target = file_data['val_y']                             # (num_data, seq_len, num_node)
 
     test_x = file_data['test_x']                                # (num_data, seq_len, num_node)
+    max_test_x = np.max(test_x)
     test_y = file_data['test_y']                                # (num_data, seq_len, num_node)
+    max_test_y = np.max(test_y)
 
     #print(train_X.shape)         #(num_data, seq_len, N)
     #print(train_Y.shape)         #(num_data, pre_len, N)
@@ -103,4 +109,4 @@ def generate_torch_datasets(data_path, year):
     test_dataset = torch.utils.data.TensorDataset(
         torch.FloatTensor(test_x), torch.FloatTensor(test_y)
     )
-    return train_dataset, test_dataset
+    return train_dataset, test_dataset, max(max_train_x, max_train_y, max_test_x, max_test_y)

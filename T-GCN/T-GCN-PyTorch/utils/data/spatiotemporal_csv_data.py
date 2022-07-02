@@ -54,7 +54,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
     #     )
 
     def setup(self, stage: str = None):
-        self.train_dataset, self.val_dataset = utils.data.functions.generate_torch_datasets(self._feat, self.year)
+        self.train_dataset, self.val_dataset, self._feat_max_val = utils.data.functions.generate_torch_datasets(self._feat, self.year)
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size)
