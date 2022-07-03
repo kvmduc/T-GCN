@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import os.path as osp
 import pytorch_lightning as pl
 from torch.utils.data.dataloader import DataLoader
 import utils.data.functions
@@ -26,9 +27,9 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         self.pre_len = pre_len
         self.split_ratio = split_ratio
         self.normalize = normalize
-        self._feat = self._feat_path
+        self._feat = utils.data.functions.load_features(osp.join(osp.abspath(osp.join(self._feat_path,"..")), "finaldata"), year)
         self._adj = utils.data.functions.load_adjacency_matrix(self._adj_path, year)
-        self._feat_max_val = 0
+        self._feat_max_val = np.max(self._feat)
         self.year = year
 
     @staticmethod
@@ -36,7 +37,7 @@ class SpatioTemporalCSVDataModule(pl.LightningDataModule):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument("--batch_size", type=int, default=32)
         parser.add_argument("--seq_len", type=int, default=12)
-        parser.add_argument("--pre_len", type=int, default=3)
+        parser.add_argument("--pre_len", type=int, default=12)
         parser.add_argument("--split_ratio", type=float, default=0.8)
         parser.add_argument("--normalize", type=bool, default=True)
         return parser

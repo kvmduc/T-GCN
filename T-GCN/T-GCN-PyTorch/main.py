@@ -13,7 +13,7 @@ import utils.logging
 DATA_PATHS = {
     "shenzhen": {"feat": "data/sz_speed.csv", "adj": "data/sz_adj.csv"},
     "losloop": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
-    "PEMS03_stream": {"feat": "data/los_speed.csv", "adj": "data/los_adj.csv"},
+    "PEMS03_stream": {"feat": "/content/T-GCN/T-GCN/T-GCN-PyTorch/data/district3F11T17/FastData/", "adj": "/content/T-GCN/T-GCN/T-GCN-PyTorch/data/district3F11T17/graph/"},
 }
 
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     parser = pl.Trainer.add_argparse_args(parser)
 
     parser.add_argument(
-        "--data", type=str, help="The name of the dataset", choices=("shenzhen", "losloop"), default="losloop"
+        "--data", type=str, help="The name of the dataset", choices=("shenzhen", "losloop"), default="PEMS03_stream"
     )
     parser.add_argument(
         "--model_name",

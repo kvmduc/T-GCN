@@ -6,7 +6,11 @@ import os.path as osp
 
 
 
-def load_features(feat_path, dtype=np.float32):
+def load_features(feat_path, year, dtype=np.float32):
+    dirpath = os.path.dirname(feat_path)
+
+    feat_path = os.path.join(dirpath, str(year)+".npz")
+    
     feat_df = pd.read_csv(feat_path)
     feat = np.array(feat_df, dtype=dtype)
     return feat
@@ -77,7 +81,6 @@ def generate_dataset(
 
 def generate_torch_datasets(data_path, year):
 
-    _feat_max_val = 0
     dirpath = os.path.dirname(data_path)
 
     filename = os.path.join(dirpath, str(year)+"_30day.npz")
